@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC">
+                <property name="" value=""/>
+            </transactionManager>
+            <dataSource type="UNPOOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://cdb-34x5jpzg.cd.tencentcdb.com:10072/bookshelf"/>
+                <property name="username" value="librarian"/>
+                <property name="password" value="1234568"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper class="book.manager.dao.mapper.BookMapper"/>
+        <mapper class="book.manager.dao.mapper.UserMapper"/>
+    </mappers>
+</configuration>

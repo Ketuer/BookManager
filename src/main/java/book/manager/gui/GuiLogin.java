@@ -1,4 +1,4 @@
-package book.mamager.gui;
+package book.manager.gui;
 
 import dandelion.ui.gui.Gui;
 
