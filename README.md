@@ -1,4 +1,4 @@
-![Markdown](http://i1.fuimg.com/604599/9fceb8013234c8e0.png)
+![Markdown](http://i1.fuimg.com/604599/002c225fec754412.png)
 # BookManager
 UI基于Dandelion编写的图书管理系统，包含登陆、图书管理、图书借阅归还、用户管理等功能。
 
