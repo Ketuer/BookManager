@@ -1,6 +1,7 @@
 package book.manager.panel;
 
 import book.manager.config.ClientConfig;
+import book.manager.entity.Account;
 import dandelion.ui.color.ColorConfig;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
@@ -17,19 +18,21 @@ public class SettingPanel extends DPanel {
 
     Gui gui;
 
-    public SettingPanel(Gui gui) {
+    public SettingPanel(Gui gui, Account account) {
         super("panel.title.setting");
         this.gui = gui;
 
         try {
             DImage image = new DImage(130, 130,
-                    ImageIO.read(new URL("https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.houpao.com%2Fdy%2Fdyrs%2F20191016%2F9a0f9f752f8f29de6d24153e39aa8066.jpg&refer=http%3A%2F%2Fimg.houpao.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1623940577&t=1fad0ca37a20b334218fd125d6073a85")));
+                    ImageIO.read(new URL(account.getHeader())));
             image.setArc(130);
             this.add(image, 325, 20);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DLabel name = new DLabel("张三 (图书管理员)");
+        DLabel name = new DLabel(account.getRole().equals("Admin") ?
+                new Text("label.admin.name", account.getName()) :
+                new Text("label.reader.name", account.getName()), 0);
         name.setFont(new Font("", Font.PLAIN, 16));
         this.add(name, (780 - name.getWidth())/2, 170);
 

@@ -47,6 +47,12 @@ public class ClientConfig {
         return i;
     }
 
+    public static boolean getBoolean(String key){
+        Boolean b = settings.getBoolean(key);
+        if(b == null) return false;
+        return b;
+    }
+
     public static double getDouble(String key){
         return settings.getDouble(key);
     }
@@ -55,24 +61,13 @@ public class ClientConfig {
         return settings.getString(key);
     }
 
-    public static String getLanguage(String key){
-        return settings.getString(key).replace("setting.language.", "");
-    }
-
-    public static ColorConfig getColor(String key){
-        switch (settings.getString(key)){
-            case "setting.color.dark":
-                return ColorSwitch.DARK;
-            case "setting.color.light":
-            default:
-                return ColorSwitch.LIGHT;
-        }
-    }
-
     private static JSONObject getDefaultSettings(){
         JSONObject object = new JSONObject();
         object.put("language", "setting.language.zh_cn");
         object.put("themeColor", "setting.color.light");
+        object.put("savePassword", false);
+        object.put("password", "");
+        object.put("userName", "");
         return object;
     }
 }

@@ -2,7 +2,7 @@ package book.manager;
 
 import book.manager.config.ClientConfig;
 import book.manager.dao.DatabaseManager;
-import book.manager.gui.GuiAdmin;
+import book.manager.gui.GuiLogin;
 import book.manager.panel.SettingPanel;
 import dandelion.ui.color.ColorConfig;
 import dandelion.ui.lang.i18n;
@@ -22,7 +22,7 @@ public class Main {
         DatabaseManager.init();
 
         logger.info("正在启动客户端...");
-        GuiAdmin login = new GuiAdmin();
+        GuiLogin login = new GuiLogin();
         login.switchColor(config);
         login.display();
         logger.info("客户端已启动！");

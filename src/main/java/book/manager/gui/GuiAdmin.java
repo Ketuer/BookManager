@@ -1,5 +1,7 @@
 package book.manager.gui;
 
+import book.manager.config.ClientConfig;
+import book.manager.entity.Account;
 import book.manager.panel.BookPanel;
 import book.manager.panel.BorrowPanel;
 import book.manager.panel.IndexPanel;
@@ -11,6 +13,17 @@ import dandelion.ui.lang.Text;
 import dandelion.ui.tip.Loading;
 
 public class GuiAdmin extends GuiMain{
+
+    Account account;
+
+    public GuiAdmin(Account account, boolean save){
+        this.account = account;
+        if(save) {
+            ClientConfig.put("savePassword", true);
+            ClientConfig.put("password", account.getPassword());
+            ClientConfig.put("userName", account.getName());
+        }
+    }
 
     @Override
     protected boolean onLoad(Loading loading) {
@@ -39,7 +52,7 @@ public class GuiAdmin extends GuiMain{
         loading.updateState(new Text("load.admin.setting"), 50);
         DIcon icon_tab_setting = new DIcon("/light/tab_setting.png", DIcon.JAR);
         icon_tab_setting.registerColorConfig(ColorSwitch.DARK, "/dark/tab_setting.png", DIcon.JAR);
-        tab.add(new SettingPanel(this));
+        tab.add(new SettingPanel(this,account));
         tab.setIconAt(3, icon_tab_setting);
 
         this.add(tab, 0, 0);

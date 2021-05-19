@@ -2,38 +2,57 @@ package book.manager.panel;
 
 import book.manager.dao.DatabaseManager;
 import book.manager.dao.mapper.BookMapper;
+import book.manager.entity.Account;
 import book.manager.entity.Book;
+import book.manager.entity.Borrow;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
+import dandelion.ui.gui.Gui;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.sql.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReaderPanel extends DPanel {
 
     private final Map<String, List<Book>> books = new HashMap<>();
+    private final List<Borrow> borrows = new ArrayList<>();
     DefaultMutableTreeNode all = new DefaultMutableTreeNode("tree.top.book");
     DTree tree = new DTree(all, 170, 370);
 
     DButton refresh = new DButton("button.func.refresh", 170, 30, e -> this.updateList());
 
     DTable table = new DTable();
-    DScroll detailScroll = new DScroll(560, 390, table);
+    DTable tableBorrow = new DTable();
+
+    DScroll detailScroll = new DScroll(560, 200, table);
+    DScroll borrowScroll = new DScroll(560, 145, tableBorrow);
+
     DIcon searchIcon = new DIcon("/light/input_search.png", DIcon.JAR);
     DTextField search = new DTextField(searchIcon, 470, 25, "hint.search");
     String searchKeyword = search.getText();
     DButton borrowBook = new DButton("button.book.borrow", 80, 25);
 
-    public ReaderPanel() {
+    DButton returnBook = new DButton("button.borrow.return", 100, 30);
+
+    Account account;
+    Gui gui;
+
+    public ReaderPanel(Account account, Gui gui) {
         super("panel.title.reader");
+
+        this.gui = gui;
+
+        BookMapper mapper = DatabaseManager.getBookMapper();
+
+        this.account = account;
+
         this.updateList();
         this.add(tree, 20, 20);
         tree.setFont(new Font("", Font.PLAIN, 14));
@@ -46,7 +65,14 @@ public class ReaderPanel extends DPanel {
         this.selectDefault();
         table.setFont(new Font("", Font.PLAIN, 14));
         table.setRowHeight(20);
+        tableBorrow.setFont(new Font("", Font.PLAIN, 14));
+        tableBorrow.setRowHeight(20);
         this.add(detailScroll, 205, 40);
+        this.add(borrowScroll, 205, 280);
+        DLabel borrowLabel = new DLabel("label.borrow.list");
+        borrowLabel.setFont(new Font("", Font.PLAIN, 16));
+        this.add(borrowLabel, 205, 255);
+        this.add(returnBook, 665, 245);
         searchIcon.registerColorConfig(ColorSwitch.DARK, "/dark/input_search.png", DIcon.JAR);
         this.add(search, 205, 10);
         search.addKeyListener(new KeyAdapter() {
@@ -58,14 +84,62 @@ public class ReaderPanel extends DPanel {
             }
         });
         this.add(borrowBook, 685, 10);
+        borrowBook.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if(row == -1) return;
+            String title = table.getValueAt(row, 2).toString();
+            mapper.addBorrow(new Borrow(account.getName(), title, "", "", plusDay(0), plusDay(3)));
+            gui.showConfirmTip("tip.borrow.ok", "tip.button.ok", 200, 150);
+            updateList();
+            updateBorrowScroll();
+            updateScroll(tree.getSelectionPath().getPath()[1].toString());
+        });
+        returnBook.addActionListener(e -> {
+            int row = tableBorrow.getSelectedRow();
+            if(row == -1) return;
+            String title = tableBorrow.getValueAt(row, 1).toString();
+            mapper.removeBorrow(account.getName(), title);
+            gui.showConfirmTip("tip.borrow.return", "tip.button.ok", 200, 150);
+            updateList();
+            updateBorrowScroll();
+            updateScroll(tree.getSelectionPath().getPath()[1].toString());
+        });
     }
+
+    /**
+     * 当前日期加上天数后的日期
+     * @param num 为增加的天数
+     * @return 新的日期
+     */
+     public Date plusDay(int num){
+         java.util.Date d;
+         Calendar ca = Calendar.getInstance();
+         ca.add(Calendar.DATE, num);
+         d = ca.getTime();
+         return new Date(d.getTime());
+     }
 
     private void selectDefault(){
         if(tree.getSelectionPath() != null && tree.getSelectionPath().getPath().length > 1)
             this.updateScroll(tree.getSelectionPath().getPath()[1].toString());
+        this.updateBorrowScroll();
         if(table.getRowCount() > 0){
             table.setRowSelectionInterval(0, 0);
         }
+    }
+
+    private void updateBorrowScroll(){
+        Object[] head = {"table.book.no", "table.book.title", "table.borrow.start", "table.borrow.end"};
+        Object[][] data = new Object[borrows.size()][head.length];
+        for (int i = 0; i < borrows.size(); i++) {
+            Borrow borrow = borrows.get(i);
+            data[i][0] = i;
+            data[i][1] = borrow.getTitle();
+            data[i][2] = borrow.getStart();
+            data[i][3] = borrow.getEnd();
+        }
+        tableBorrow.setData(data, head);
+        tableBorrow.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     /**
@@ -102,13 +176,20 @@ public class ReaderPanel extends DPanel {
      */
     private void updateList(){
         books.clear();
+        borrows.clear();
         all.removeAllChildren();
         BookMapper mapper = DatabaseManager.getBookMapper();
+        borrows.addAll(mapper.getUserBorrow(account.getName()));
         mapper.getBookCategory().forEach(category -> {
             books.put(category.getName(), new ArrayList<>());
             DefaultMutableTreeNode type = new DefaultMutableTreeNode(category);
             all.add(type);
-            mapper.getBookByCategory(category).forEach(book -> books.get(category.getName()).add(book));
+            mapper.getBookByCategory(category).forEach(book -> {
+                for(Borrow borrow : borrows){
+                    if(borrow.getTitle().equals(book.getTitle())) return;
+                }
+                books.get(category.getName()).add(book);
+            });
         });
     }
 }

@@ -56,4 +56,14 @@ public interface BookMapper {
     @Delete("delete from DB_LEND where account_id = (select id from DB_ACCOUNT where name = #{aid}) " +
             "and book_id = (select id from DB_BOOK where title = #{bid})")
     void removeBorrow(@Param("aid") String aid, @Param("bid") String bid);
+
+    @Insert("insert into DB_LEND (account_id, book_id, `start`, `end`) " +
+            "values ((select id from DB_ACCOUNT where name = #{name})," +
+            " (select id from DB_BOOK where title = #{title}), #{start}, #{end})")
+    void addBorrow(Borrow borrow);
+
+    @Select("SELECT `name`, title, author, description, `start`, `end`  FROM DB_LEND LEFT JOIN DB_ACCOUNT ON DB_LEND.account_id = DB_ACCOUNT.id " +
+            "LEFT JOIN DB_BOOK ON DB_LEND.book_id = DB_BOOK.id " +
+            "WHERE `start` < NOW() && `end` > NOW() and `name` = #{name}")
+    List<Borrow> getUserBorrow(String name);
 }

@@ -7,10 +7,13 @@ import dandelion.ui.component.DButton;
 import dandelion.ui.component.DLabel;
 import dandelion.ui.component.DTextField;
 import dandelion.ui.gui.Gui;
+import dandelion.ui.lang.LanguageSwitch;
 import dandelion.ui.tip.Tip;
 import dandelion.ui.tip.TipConfirm;
 
-public class TipAddCategory extends Tip {
+import java.awt.*;
+
+public class TipAddCategory extends Tip implements LanguageSwitch {
 
     private boolean isSuccess = false;
     DButton cancel = new DButton("tip.button.cancel", 100, 30, e -> close());
@@ -37,6 +40,13 @@ public class TipAddCategory extends Tip {
 
         this.addComponent(ok, 45, 90);
         this.addComponent(cancel, 155, 90);
+    }
+
+    @Override
+    public void switchLanguage(String language) {
+        for(Component c : this.getContentPane().getComponents()){
+            if(c instanceof LanguageSwitch) ((LanguageSwitch) c).switchLanguage(language);
+        }
     }
 
     public boolean getResult(){

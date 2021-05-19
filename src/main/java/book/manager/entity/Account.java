@@ -11,4 +11,6 @@ public class Account {
     int id;
     String name;
     String role;
+    String header;
+    String password;
 }

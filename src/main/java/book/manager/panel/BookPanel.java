@@ -182,6 +182,8 @@ public class BookPanel extends DPanel {
         });
         add.addActionListener(e -> {
             TipAddCategory addCategory = new TipAddCategory(gui);
+            addCategory.switchColor(gui.getColorConfig());
+            addCategory.switchLanguage(gui.getLanguage());
             boolean res = addCategory.getResult();
             if(res){
                 gui.showConfirmTip("tip.category.add.ok", "tip.button.ok", 200, 150);
