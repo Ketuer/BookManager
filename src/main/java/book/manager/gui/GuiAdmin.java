@@ -2,10 +2,7 @@ package book.manager.gui;
 
 import book.manager.config.ClientConfig;
 import book.manager.entity.Account;
-import book.manager.panel.BookPanel;
-import book.manager.panel.BorrowPanel;
-import book.manager.panel.IndexPanel;
-import book.manager.panel.SettingPanel;
+import book.manager.panel.*;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.DIcon;
 import dandelion.ui.component.DTab;
@@ -49,11 +46,17 @@ public class GuiAdmin extends GuiMain{
         tab.add(new BorrowPanel(this));
         tab.setIconAt(2, icon_tab_borrow);
 
-        loading.updateState(new Text("load.admin.setting"), 50);
+        loading.updateState(new Text("load.admin.account"), 50);
+        DIcon icon_tab_account = new DIcon("/light/tab_user.png", DIcon.JAR);
+        icon_tab_account.registerColorConfig(ColorSwitch.DARK, "/dark/tab_user.png", DIcon.JAR);
+        tab.add(new UserPanel(this));
+        tab.setIconAt(3, icon_tab_account);
+
+        loading.updateState(new Text("load.admin.setting"), 60);
         DIcon icon_tab_setting = new DIcon("/light/tab_setting.png", DIcon.JAR);
         icon_tab_setting.registerColorConfig(ColorSwitch.DARK, "/dark/tab_setting.png", DIcon.JAR);
         tab.add(new SettingPanel(this,account));
-        tab.setIconAt(3, icon_tab_setting);
+        tab.setIconAt(4, icon_tab_setting);
 
         this.add(tab, 0, 0);
         return true;

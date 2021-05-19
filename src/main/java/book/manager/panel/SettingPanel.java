@@ -35,6 +35,8 @@ public class SettingPanel extends DPanel {
                 new Text("label.reader.name", account.getName()), 0);
         name.setFont(new Font("", Font.PLAIN, 16));
         this.add(name, (780 - name.getWidth())/2, 170);
+        DLabel note = new DLabel(account.getNote());
+        this.add(note, (780 - note.getWidth())/2, 200);
 
 
         DLabel languageSetting = new DLabel("setting.language");
@@ -69,11 +71,10 @@ public class SettingPanel extends DPanel {
         });
 
         DLabel version = new DLabel(new Text("label.version", "1.0.0 Beta"), 0);
-        DButton update = new DButton("button.update", 100, 30);
+        DButton update = new DButton("button.update", 100, 30,
+                e -> gui.showConfirmTip("tip.update", "tip.button.ok", 200, 150));
         this.add(update, 640, 400);
         this.add(version, 630, 370);
-
-
     }
 
     public static String convertLanguage(String s){

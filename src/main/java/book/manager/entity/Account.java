@@ -10,7 +10,9 @@ import lombok.ToString;
 public class Account {
     int id;
     String name;
+    String sex;
     String role;
     String header;
     String password;
+    String note;
 }
