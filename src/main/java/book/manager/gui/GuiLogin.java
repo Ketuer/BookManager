@@ -1,6 +1,5 @@
 package book.manager.gui;
 
-import book.manager.Main;
 import book.manager.config.ClientConfig;
 import book.manager.dao.DatabaseManager;
 import book.manager.dao.mapper.UserMapper;
@@ -15,6 +14,7 @@ import org.apache.log4j.Logger;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 
 public class GuiLogin extends Gui {
@@ -27,10 +27,12 @@ public class GuiLogin extends Gui {
         mainPanel.setOpaque(true);
         mainPanel.setPaintBackground(false);
         this.setContentPane(mainPanel);
+        this.setIcon();
     }
 
     @Override
     protected boolean onLoad(Loading loading) {
+
         loading.updateState(new Text("load.login.download"), 10);
 
         UserMapper mapper = DatabaseManager.getUserMapper();
@@ -96,5 +98,29 @@ public class GuiLogin extends Gui {
         this.add(new DButton("button.exit", 100, 30, e -> this.close()), 205, 210);
         this.getContentPane().setComponentZOrder(background, this.getContentPane().getComponentCount() - 1);
         return true;
+    }
+
+    /**
+     * 为了跨平台兼容性，采用反射编写
+     * MAC OS X为了支持dock栏特别编写了相关代码
+     */
+    private void setIcon(){
+        DIcon icon = new DIcon("/icon.png", DIcon.JAR);
+        DIcon icon_big = new DIcon("/icon_big.png", DIcon.JAR);
+
+        try{
+            String osName = System.getProperty("os.name");
+            if(osName.equals("Mac OS X")){
+                Class<?> application = Class.forName("com.apple.eawt.Application");
+                Method getApplication = application.getMethod("getApplication");
+                Object object = getApplication.invoke(null);
+                Method setDockIconImage = application.getMethod("setDockIconImage", Image.class);
+                setDockIconImage.invoke(object, icon.getImage());
+            }else {
+                this.setIconImage(icon_big.getImage());
+            }
+        }catch (ReflectiveOperationException e){
+            e.printStackTrace();
+        }
     }
 }
