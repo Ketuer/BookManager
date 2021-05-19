@@ -1,5 +1,6 @@
 package book.manager.gui;
 
+import book.manager.Main;
 import book.manager.config.ClientConfig;
 import book.manager.dao.DatabaseManager;
 import book.manager.dao.mapper.UserMapper;
@@ -9,6 +10,7 @@ import dandelion.ui.component.*;
 import dandelion.ui.gui.Gui;
 import dandelion.ui.lang.Text;
 import dandelion.ui.tip.Loading;
+import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,6 +18,8 @@ import java.io.IOException;
 import java.net.URL;
 
 public class GuiLogin extends Gui {
+
+    Logger logger = Logger.getLogger(GuiLogin.class);
 
     public GuiLogin() {
         super(new Text("gui.title.login"), 400, 250, true);
@@ -81,6 +85,7 @@ public class GuiLogin extends Gui {
                 showConfirmTip("tip.login.failed", "tip.button.ok", 200, 150);
                 return;
             }
+            logger.info("登陆成功，登陆账号为："+account.getName()+" ("+account.getRole()+")");
             if(account.getRole().equals("Admin")){
                 this.redirectGui(new GuiAdmin(account, check.isSelected()));
             }else{

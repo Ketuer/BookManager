@@ -3,6 +3,7 @@ package book.manager.panel;
 import book.manager.dao.DatabaseManager;
 import book.manager.dao.mapper.BookMapper;
 import book.manager.entity.Book;
+import book.manager.gui.GuiReader;
 import book.manager.tip.TipAddBook;
 import book.manager.tip.TipAddCategory;
 import dandelion.ui.color.ColorSwitch;
@@ -10,6 +11,7 @@ import dandelion.ui.component.*;
 import dandelion.ui.gui.Gui;
 import dandelion.ui.lang.Text;
 import dandelion.ui.tip.TipConfirm;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 public class BookPanel extends DPanel {
 
+    Logger logger = Logger.getLogger(BookPanel.class);
     private final Map<String, List<Book>> books = new HashMap<>();
     DTree tree;
 
@@ -108,6 +111,7 @@ public class BookPanel extends DPanel {
                 confirm.setAlwaysOnTop(true);
                 confirm.display();
             }else{
+                logger.info("管理员正在修改图书 "+title+" 的信息");
                 Book book = new Book(title, author, desc, Integer.parseInt(year));
                 mapper.updateBook(book, tree.getSelectionPath().getPath()[1].toString());
                 gui.showConfirmTip("tip.edit.save", "tip.button.ok", 200, 150);
@@ -143,6 +147,7 @@ public class BookPanel extends DPanel {
             DButton ok = new DButton("tip.button.ok");
             DButton cancel = new DButton("tip.button.cancel");
             if(gui.showSelectTip("tip.book.delete", 200, 100, ok, cancel) == 0){
+                logger.info("管理员正在删除图书 "+bookName.getText()+" 的信息");
                 mapper.removeBook(bookName.getText());
                 gui.showConfirmTip("tip.book.delete.ok", "tip.button.ok", 200, 150);
                 updateList();
@@ -154,6 +159,7 @@ public class BookPanel extends DPanel {
         addBook.addActionListener(e -> {
             boolean success = new TipAddBook(gui, books.keySet()).getResult();
             if(success){
+                logger.info("管理员正在添加图书...");
                 gui.showConfirmTip("tip.book.add.ok", "tip.button.ok", 200, 150);
                 updateList();
                 selectDefault();
@@ -186,6 +192,7 @@ public class BookPanel extends DPanel {
             addCategory.switchLanguage(gui.getLanguage());
             boolean res = addCategory.getResult();
             if(res){
+                logger.info("管理员正在添加分类...");
                 gui.showConfirmTip("tip.category.add.ok", "tip.button.ok", 200, 150);
                 updateList();
                 tree.expandRow(0);
@@ -198,6 +205,7 @@ public class BookPanel extends DPanel {
             DButton cancel = new DButton("tip.button.cancel");
             if(gui.showSelectTip("tip.category.delete", 200, 100, ok, cancel) == 0){
                 String category = tree.getSelectionPath().getPath()[1].toString();
+                logger.info("管理员正在删除分类 "+category);
                 mapper.removeBookByCategory(category);
                 mapper.removeCategory(category);
                 gui.showConfirmTip("tip.category.delete.ok", "tip.button.ok", 200, 150);

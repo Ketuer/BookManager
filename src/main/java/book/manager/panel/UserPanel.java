@@ -8,11 +8,9 @@ import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
 import dandelion.ui.gui.Gui;
 import dandelion.ui.lang.Text;
+import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -24,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class UserPanel extends DPanel {
 
+    Logger logger = Logger.getLogger(BookPanel.class);
     DIcon searchIcon = new DIcon("/light/input_search.png", DIcon.JAR);
     DTextField search = new DTextField(searchIcon, 180, 25, "hint.search.user");
     DTable table = new DTable();
@@ -84,6 +83,7 @@ public class UserPanel extends DPanel {
             account.setName(name);
             account.setSex(sex);
             account.setNote(note);
+            logger.info("管理员更新了用户 "+oldName+" 的信息: "+account);
             mapper.updateUser(account, oldName);
             gui.showConfirmTip("tip.account.update", "tip.button.ok", 200, 150);
             updateList();
@@ -97,6 +97,7 @@ public class UserPanel extends DPanel {
         int row = table.getSelectedRow();
         if(row >= 0){
             String name = table.getValueAt(row, 1).toString();
+            logger.info("管理员移除了用户 "+name);
             mapper.removeUser(name);
             gui.showConfirmTip("tip.account.delete", "tip.button.ok", 200, 150);
             updateList();
@@ -108,8 +109,10 @@ public class UserPanel extends DPanel {
     private void createUser(){
         TipAddAccount tipAddAccount = new TipAddAccount(gui);
         boolean success = tipAddAccount.getResult();
-        if(success)
+        if(success){
             gui.showConfirmTip("tip.account.add", "tip.button.ok", 200, 150);
+            logger.info("管理员创建了一个新用户！");
+        }
         updateList();
         updateScroll();
         selectDefault();

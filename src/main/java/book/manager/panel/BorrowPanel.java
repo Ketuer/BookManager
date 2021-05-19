@@ -3,10 +3,12 @@ package book.manager.panel;
 import book.manager.dao.DatabaseManager;
 import book.manager.dao.mapper.BookMapper;
 import book.manager.entity.Borrow;
+import book.manager.gui.GuiReader;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
 import dandelion.ui.gui.Gui;
 import dandelion.ui.lang.Text;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class BorrowPanel extends DPanel {
 
     List<Borrow> list = new ArrayList<>();
+    Logger logger = Logger.getLogger(BorrowPanel.class);
 
     DTable table = new DTable();
     DScroll borrowScroll = new DScroll(760, 390, table);
@@ -55,8 +58,9 @@ public class BorrowPanel extends DPanel {
             int row = table.getSelectedRow();
             String aid = table.getValueAt(row, 3).toString();
             String bid = table.getValueAt(row, 4).toString();
+            logger.info("管理员正在删除借阅信息 "+aid+" > "+bid);
             mapper.removeBorrow(aid, bid);
-            gui.showConfirmTip("分类删除成功！", "tip.button.ok", 200, 150);
+            gui.showConfirmTip("tip.borrow.delete", "tip.button.ok", 200, 150);
             this.updateList();
         });
         searchIcon.registerColorConfig(ColorSwitch.DARK, "/dark/input_search.png", DIcon.JAR);

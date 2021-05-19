@@ -1,16 +1,20 @@
 package book.manager.gui;
 
 import book.manager.dao.DatabaseManager;
+import book.manager.panel.ReaderPanel;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.DButton;
 import dandelion.ui.component.DIcon;
 import dandelion.ui.gui.Gui;
 import dandelion.ui.lang.Text;
 import dandelion.ui.tip.Loading;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 
 public abstract class GuiMain extends Gui {
+    Logger logger = Logger.getLogger(GuiMain.class);
+
     public GuiMain(){
         super(new Text("gui.title.main"), 800, 500, true);
     }
@@ -40,6 +44,8 @@ public abstract class GuiMain extends Gui {
         config.fontColor = Color.white;
         ok.getColorConfig(ColorSwitch.DARK).backgroundColor = new Color(61, 141, 205);
         DButton cancel = new DButton("tip.button.cancel");
-        return this.showSelectTip("tip.exit", 250, 150, ok, cancel) == 0;
+        boolean exit = this.showSelectTip("tip.exit", 250, 150, ok, cancel) == 0;
+        if(exit) logger.info("正在退出客户端...");
+        return exit;
     }
 }

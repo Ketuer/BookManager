@@ -5,9 +5,11 @@ import book.manager.dao.mapper.BookMapper;
 import book.manager.entity.Account;
 import book.manager.entity.Book;
 import book.manager.entity.Borrow;
+import book.manager.gui.GuiReader;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
 import dandelion.ui.gui.Gui;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 
 public class ReaderPanel extends DPanel {
 
+    Logger logger = Logger.getLogger(ReaderPanel.class);
     private final Map<String, List<Book>> books = new HashMap<>();
     private final List<Borrow> borrows = new ArrayList<>();
     DefaultMutableTreeNode all = new DefaultMutableTreeNode("tree.top.book");
@@ -88,6 +91,7 @@ public class ReaderPanel extends DPanel {
             int row = table.getSelectedRow();
             if(row == -1) return;
             String title = table.getValueAt(row, 2).toString();
+            logger.info("用户借阅了一本图书 "+title);
             mapper.addBorrow(new Borrow(account.getName(), title, "", "", plusDay(0), plusDay(3)));
             gui.showConfirmTip("tip.borrow.ok", "tip.button.ok", 200, 150);
             updateList();
@@ -98,6 +102,7 @@ public class ReaderPanel extends DPanel {
             int row = tableBorrow.getSelectedRow();
             if(row == -1) return;
             String title = tableBorrow.getValueAt(row, 1).toString();
+            logger.info("用户归还了一本图书 "+title);
             mapper.removeBorrow(account.getName(), title);
             gui.showConfirmTip("tip.borrow.return", "tip.button.ok", 200, 150);
             updateList();
