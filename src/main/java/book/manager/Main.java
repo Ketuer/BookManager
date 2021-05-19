@@ -3,7 +3,6 @@ package book.manager;
 import book.manager.config.ClientConfig;
 import book.manager.dao.DatabaseManager;
 import book.manager.gui.GuiAdmin;
-import book.manager.gui.GuiReader;
 import book.manager.panel.SettingPanel;
 import dandelion.ui.color.ColorConfig;
 import dandelion.ui.lang.i18n;

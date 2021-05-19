@@ -5,17 +5,17 @@ import book.manager.dao.mapper.BookMapper;
 import book.manager.entity.Book;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
-import dandelion.ui.lang.Text;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ReaderPanel extends DPanel {
 
@@ -29,6 +29,7 @@ public class ReaderPanel extends DPanel {
     DScroll detailScroll = new DScroll(560, 390, table);
     DIcon searchIcon = new DIcon("/light/input_search.png", DIcon.JAR);
     DTextField search = new DTextField(searchIcon, 470, 25, "hint.search");
+    String searchKeyword = search.getText();
     DButton borrowBook = new DButton("button.book.borrow", 80, 25);
 
     public ReaderPanel() {
@@ -48,6 +49,14 @@ public class ReaderPanel extends DPanel {
         this.add(detailScroll, 205, 40);
         searchIcon.registerColorConfig(ColorSwitch.DARK, "/dark/input_search.png", DIcon.JAR);
         this.add(search, 205, 10);
+        search.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                searchKeyword = search.getText();
+                updateList();
+                updateScroll(tree.getSelectionPath().getPath()[1].toString());
+            }
+        });
         this.add(borrowBook, 685, 10);
     }
 
@@ -63,7 +72,11 @@ public class ReaderPanel extends DPanel {
      * 更新分类书籍详细列表
      */
     private void updateScroll(String category){
-        List<Book> list = books.get(category);
+        List<Book> list = books.get(category)
+                .stream()
+                .filter(book -> book.getDesc().contains(searchKeyword) || book.getTitle().contains(searchKeyword) ||
+                        book.getAuthor().contains(searchKeyword) || (book.getYear() + "").contains(searchKeyword))
+                .collect(Collectors.toList());
         Object[] head = {"table.book.no", "table.book.year", "table.book.title", "table.book.author", "table.book.desc"};
         Object[][] data = new Object[list.size()][head.length];
         for (int i = 0; i < list.size(); i++) {

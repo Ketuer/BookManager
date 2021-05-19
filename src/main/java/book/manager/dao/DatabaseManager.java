@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.io.Reader;
 
 public class DatabaseManager {
@@ -25,7 +26,7 @@ public class DatabaseManager {
             logger.info("正在初始化数据库...");
             Reader reader = Resources.getResourceAsReader("MapperConfig.xml");
             SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-            SqlSession sqlSession = sqlSessionFactory.openSession();
+            SqlSession sqlSession = sqlSessionFactory.openSession(true);
             instance = new DatabaseManager(sqlSession);
             logger.info("数据库初始化完成...");
             return true;

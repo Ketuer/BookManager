@@ -1,5 +1,6 @@
 package book.manager.gui;
 
+import book.manager.dao.DatabaseManager;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.DButton;
 import dandelion.ui.component.DIcon;

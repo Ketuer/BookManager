@@ -6,7 +6,6 @@ import book.manager.panel.IndexPanel;
 import book.manager.panel.SettingPanel;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.DIcon;
-import dandelion.ui.component.DPanel;
 import dandelion.ui.component.DTab;
 import dandelion.ui.lang.Text;
 import dandelion.ui.tip.Loading;
@@ -28,13 +27,13 @@ public class GuiAdmin extends GuiMain{
         loading.updateState(new Text("load.admin.book"), 30);
         DIcon icon_tab_book = new DIcon("/light/tab_book.png", DIcon.JAR);
         icon_tab_book.registerColorConfig(ColorSwitch.DARK, "/dark/tab_book.png", DIcon.JAR);
-        tab.add(new BookPanel());
+        tab.add(new BookPanel(this));
         tab.setIconAt(1, icon_tab_book);
 
         loading.updateState(new Text("load.admin.lend"), 40);
         DIcon icon_tab_borrow = new DIcon("/light/tab_borrow.png", DIcon.JAR);
         icon_tab_borrow.registerColorConfig(ColorSwitch.DARK, "/dark/tab_borrow.png", DIcon.JAR);
-        tab.add(new BorrowPanel());
+        tab.add(new BorrowPanel(this));
         tab.setIconAt(2, icon_tab_borrow);
 
         loading.updateState(new Text("load.admin.setting"), 50);

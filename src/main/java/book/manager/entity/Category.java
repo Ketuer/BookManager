@@ -8,7 +8,6 @@ import lombok.Data;
 public class Category {
     String id;
     String name;
-    String desc;
 
     public String toString(){
         return name;

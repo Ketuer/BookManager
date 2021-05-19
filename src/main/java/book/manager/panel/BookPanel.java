@@ -3,27 +3,33 @@ package book.manager.panel;
 import book.manager.dao.DatabaseManager;
 import book.manager.dao.mapper.BookMapper;
 import book.manager.entity.Book;
+import book.manager.tip.TipAddBook;
+import book.manager.tip.TipAddCategory;
 import dandelion.ui.color.ColorSwitch;
 import dandelion.ui.component.*;
+import dandelion.ui.gui.Gui;
 import dandelion.ui.lang.Text;
+import dandelion.ui.tip.TipConfirm;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BookPanel extends DPanel {
 
     private final Map<String, List<Book>> books = new HashMap<>();
-    DefaultMutableTreeNode all = new DefaultMutableTreeNode("tree.top.book");
-    DTree tree = new DTree(all, 170, 370);
+    DTree tree;
 
-    DButton refresh = new DButton("button.func.refresh", 100, 30, e -> this.updateList());
+    DButton refresh = new DButton("button.func.refresh", 100, 30);
     DButton add = new DButton("+", 30, 30);
     DButton decrease = new DButton("-", 30, 30);
 
@@ -46,29 +52,24 @@ public class BookPanel extends DPanel {
     DTextArea bookDesc = new DTextArea(310, 120, "hint.input.desc");
     DButton saveEdit = new DButton("button.book.save", 100, 30);
 
-    public BookPanel() {
+    String searchKeyWord = "";
+
+    Gui gui;
+    public BookPanel(Gui gui) {
         super("panel.title.book");
 
-        this.updateList();
-        this.add(tree, 20, 20);
-        tree.setFont(new Font("", Font.PLAIN, 14));
-        tree.expandRow(0);
-        tree.setSelectionRow(1);
-        tree.addTreeSelectionListener(e -> this.selectDefault());
+        this.gui = gui;
 
-        this.add(refresh, 90, 400);
-        this.add(add, 20, 400);
-        this.add(decrease, 55, 400);
+        this.initCategoryTree();
+        this.initBookTable();
+        this.initEditPanel();
+    }
 
-        this.selectDefault();
-        table.setFont(new Font("", Font.PLAIN, 14));
-        table.setRowHeight(20);
-        this.add(detailScroll, 205, 230);
-        searchIcon.registerColorConfig(ColorSwitch.DARK, "/dark/input_search.png", DIcon.JAR);
-        this.add(search, 205, 200);
-        this.add(addBook, 600, 200);
-        this.add(remBook, 685, 200);
-
+    /**
+     * 初始化编辑面板
+     */
+    private void initEditPanel(){
+        BookMapper mapper = DatabaseManager.getBookMapper();
         DPanel editPanel = new DPanel("内容编辑", 560, 170);
         this.add(editPanel, 205, 20);
         titleEditor.setFont(new Font("", Font.PLAIN, 15));
@@ -96,12 +97,130 @@ public class BookPanel extends DPanel {
         DIcon iconSave = new DIcon("/dark/button_save.png", DIcon.JAR);
         iconSave.registerColorConfig(ColorSwitch.DARK, "/dark/button_save.png", DIcon.JAR);
         saveEdit.setIcon(iconSave);
+        saveEdit.addActionListener(e -> {
+            String title = this.bookName.getText();
+            String author = this.bookAuthor.getText();
+            String year = this.bookTime.getSelectedItem().toString();
+            String desc = this.bookDesc.getText();
+
+            if(title.isEmpty() || author.isEmpty() || desc.isEmpty()){
+                TipConfirm confirm = new TipConfirm(gui, "tip.edit.finish", "tip.button.ok", 200, 150);
+                confirm.setAlwaysOnTop(true);
+                confirm.display();
+            }else{
+                Book book = new Book(title, author, desc, Integer.parseInt(year));
+                mapper.updateBook(book, tree.getSelectionPath().getPath()[1].toString());
+                gui.showConfirmTip("tip.edit.save", "tip.button.ok", 200, 150);
+                updateList();
+                selectDefault();
+            }
+        });
         editPanel.add(saveEdit, 80, 130);
     }
 
+    /**
+     * 初始化图书列表
+     */
+    private void initBookTable(){
+        BookMapper mapper = DatabaseManager.getBookMapper();
+        table.setFont(new Font("", Font.PLAIN, 14));
+        table.setRowHeight(20);
+        this.add(detailScroll, 205, 230);
+        searchIcon.registerColorConfig(ColorSwitch.DARK, "/dark/input_search.png", DIcon.JAR);
+        this.add(search, 205, 200);
+        this.add(addBook, 600, 200);
+        this.add(remBook, 685, 200);
+        search.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                searchKeyWord = search.getText();
+                updateScroll(tree.getSelectionPath().getPath()[1].toString());
+                selectDefaultLine();
+            }
+        });
+        remBook.addActionListener(e -> {
+            if(bookName.getText().isEmpty()) return;
+            DButton ok = new DButton("tip.button.ok");
+            DButton cancel = new DButton("tip.button.cancel");
+            if(gui.showSelectTip("tip.book.delete", 200, 100, ok, cancel) == 0){
+                mapper.removeBook(bookName.getText());
+                gui.showConfirmTip("tip.book.delete.ok", "tip.button.ok", 200, 150);
+                updateList();
+                selectDefault();
+                tree.expandRow(0);
+                tree.setSelectionRow(1);
+            }
+        });
+        addBook.addActionListener(e -> {
+            boolean success = new TipAddBook(gui, books.keySet()).getResult();
+            if(success){
+                gui.showConfirmTip("tip.book.add.ok", "tip.button.ok", 200, 150);
+                updateList();
+                selectDefault();
+                tree.expandRow(0);
+                tree.setSelectionRow(1);
+            }
+        });
+    }
+
+    /**
+     * 初始化分类列表
+     */
+    private void initCategoryTree(){
+        BookMapper mapper = DatabaseManager.getBookMapper();
+        this.updateList();
+        tree.expandRow(0);
+        tree.setSelectionRow(1);
+        this.add(refresh, 90, 400);
+        this.add(add, 20, 400);
+        this.add(decrease, 55, 400);
+        refresh.addActionListener( e -> {
+            this.updateList();
+            this.selectDefault();
+            tree.expandRow(0);
+            tree.setSelectionRow(1);
+        });
+        add.addActionListener(e -> {
+            TipAddCategory addCategory = new TipAddCategory(gui);
+            boolean res = addCategory.getResult();
+            if(res){
+                gui.showConfirmTip("tip.category.add.ok", "tip.button.ok", 200, 150);
+                updateList();
+                tree.expandRow(0);
+                tree.setSelectionRow(1);
+                selectDefault();
+            }
+        });
+        decrease.addActionListener(e -> {
+            DButton ok = new DButton("tip.button.ok");
+            DButton cancel = new DButton("tip.button.cancel");
+            if(gui.showSelectTip("tip.category.delete", 200, 100, ok, cancel) == 0){
+                String category = tree.getSelectionPath().getPath()[1].toString();
+                mapper.removeBookByCategory(category);
+                mapper.removeCategory(category);
+                gui.showConfirmTip("tip.category.delete.ok", "tip.button.ok", 200, 150);
+                updateList();
+                tree.expandRow(0);
+                tree.setSelectionRow(1);
+                selectDefault();
+            }
+        });
+        this.selectDefault();
+    }
+
+    /**
+     * 选择默认的分类、书籍信息
+     */
     private void selectDefault(){
         if(tree.getSelectionPath() != null && tree.getSelectionPath().getPath().length > 1)
             this.updateScroll(tree.getSelectionPath().getPath()[1].toString());
+        this.selectDefaultLine();
+    }
+
+    /**
+     * 选择默认的书籍信息
+     */
+    private void selectDefaultLine(){
         if(table.getRowCount() > 0){
             table.setRowSelectionInterval(0, 0);
             Object o = table.getModel().getValueAt(0, 2);
@@ -110,6 +229,10 @@ public class BookPanel extends DPanel {
         }
     }
 
+    /**
+     * 更新边界框内的内容
+     * @param book 书籍
+     */
     private void updateEditor(Book book){
         bookName.setText(book.getTitle());
         bookAuthor.setText(book.getAuthor());
@@ -121,7 +244,11 @@ public class BookPanel extends DPanel {
      * 更新分类书籍详细列表
      */
     private void updateScroll(String category){
-        List<Book> list = books.get(category);
+        List<Book> list = books.get(category)
+                .stream()
+                .filter(book -> book.getTitle().contains(searchKeyWord) || book.getAuthor().contains(searchKeyWord) ||
+                        book.getDesc().contains(searchKeyWord) || (book.getYear()+"").contains(searchKeyWord))
+                .collect(Collectors.toList());
         Object[] head = {"table.book.no", "table.book.year", "table.book.title", "table.book.author", "table.book.desc"};
         Object[][] data = new Object[list.size()][head.length];
         for (int i = 0; i < list.size(); i++) {
@@ -157,7 +284,9 @@ public class BookPanel extends DPanel {
      */
     private void updateList(){
         books.clear();
-        all.removeAllChildren();
+        if(tree != null) this.remove(tree);
+        DefaultMutableTreeNode all = new DefaultMutableTreeNode("tree.top.book");
+        tree = new DTree(all, 170, 370);
         BookMapper mapper = DatabaseManager.getBookMapper();
         mapper.getBookCategory().forEach(category -> {
             books.put(category.getName(), new ArrayList<>());
@@ -165,5 +294,8 @@ public class BookPanel extends DPanel {
             all.add(type);
             mapper.getBookByCategory(category).forEach(book -> books.get(category.getName()).add(book));
         });
+        this.add(tree, 20, 20);
+        tree.setFont(new Font("", Font.PLAIN, 14));
+        tree.addTreeSelectionListener(e -> this.selectDefault());
     }
 }
