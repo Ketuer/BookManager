@@ -41,10 +41,10 @@ public class GuiLogin extends Gui {
         try {
             if(getColorConfig().equals(ColorSwitch.DARK)){
                 background = new DImage(400, 250,
-                        ImageIO.read(new URL("https://i1.fuimg.com/604599/c0b0a448aac8f6ef.png")));
+                        ImageIO.read(new URL("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2185970953,3518747076&fm=26&gp=0.jpg")));
             }else {
                 background = new DImage(400, 250,
-                        ImageIO.read(new URL("https://i1.fuimg.com/604599/3a66b7c523664142.png")));
+                        ImageIO.read(new URL("https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=2879430259,1145403574&fm=26&gp=0.jpg")));
             }
             background.setArc(20);
             background.setLocation(0, 0);

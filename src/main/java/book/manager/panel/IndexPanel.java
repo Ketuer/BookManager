@@ -4,7 +4,6 @@ import dandelion.ui.component.*;
 import dandelion.ui.lang.i18n;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -22,7 +21,7 @@ public class IndexPanel extends DPanel {
 
         try {
             DImage banner = new DImage(450, 250,
-                    ImageIO.read(new URL("http://www.cduestc.cn/attachment/core/label/2021_03/08_09/1838541d308aafa0.jpg")));
+                    ImageIO.read(new URL("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3893063898,1919576743&fm=26&gp=0.jpg")));
             banner.setArc(15);
             this.add(banner, 10, 10);
         } catch (IOException e) {

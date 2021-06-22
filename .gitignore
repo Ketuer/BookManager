@@ -27,3 +27,5 @@ target/
 *.iml
 .json
 *.DS_Store
+images/
+settings.json
